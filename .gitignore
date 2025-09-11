@@ -17,3 +17,5 @@ bld/
 [Ll]og/
 .vs/
 packages/
+
+NuGet.config

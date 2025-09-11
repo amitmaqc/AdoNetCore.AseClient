@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using AdoNetCore.AseClient.Tests.ConnectionProvider;
 using NUnit.Framework;
 
@@ -96,12 +97,13 @@ namespace AdoNetCore.AseClient.Tests.Benchmark
         }
 
         [Test]
-        public void Benchmark_UpdateMultipleRecordsWithPooledConnection_ReturnsData()
+        public async Task Benchmark_UpdateMultipleRecordsWithPooledConnection_ReturnsData()
         {
+            Console.WriteLine($"Benchmarking {nameof(Benchmark_UpdateMultipleRecordsWithPooledConnection_ReturnsData)}");
             // Arrange.
-
+            var connstr = PooledConnectionString + "ConnectionIdleTimeout=2;";
             // Act.
-            var result = UpdateMultipleRecords(PooledConnectionString);
+            var result = await UpdateMultipleRecords(connstr);
 
             // Assert.
             Assert.IsNotNull(result);
@@ -109,12 +111,12 @@ namespace AdoNetCore.AseClient.Tests.Benchmark
         }
 
         [Test]
-        public void Benchmark_UpdateMultipleRecordsWithUnpooledConnection_ReturnsData()
+        public async Task Benchmark_UpdateMultipleRecordsWithUnpooledConnection_ReturnsData()
         {
             // Arrange.
 
             // Act.
-            var result = UpdateMultipleRecords(UnpooledConnectionString);
+            var result = await UpdateMultipleRecords(UnpooledConnectionString);
 
             // Assert.
             Assert.IsNotNull(result);

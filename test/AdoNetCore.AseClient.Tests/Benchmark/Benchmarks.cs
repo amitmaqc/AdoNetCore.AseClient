@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using AdoNetCore.AseClient.Tests.ConnectionProvider;
 
 namespace AdoNetCore.AseClient.Tests.Benchmark
@@ -12,7 +14,7 @@ namespace AdoNetCore.AseClient.Tests.Benchmark
         private string _setupConnectionString;
         private T _connectionProvider;
 
-        public string UnpooledConnectionString { get; } =ConnectionStrings.NonPooled;
+        public string UnpooledConnectionString { get; } = ConnectionStrings.NonPooled;
 
         public string PooledConnectionString => ConnectionStrings.Pooled10;
 
@@ -88,7 +90,7 @@ END ";
             return null;
         }
 
-        public IEnumerable<DataItem> SingleQueryForMultipleRecords(string connectionString)
+        public List<DataItem> SingleQueryForMultipleRecords(string connectionString)
         {
             var results = new List<DataItem>();
 
@@ -122,17 +124,17 @@ END ";
             return results;
         }
 
-        public IEnumerable<DataItem> MultipleQueriesForMultipleRecords(string connectionString)
+        public List<DataItem> MultipleQueriesForMultipleRecords(string connectionString)
         {
             var results = new List<DataItem>();
 
-            using (var connection = _connectionProvider.GetConnection(connectionString))
+            foreach (var randomId in Enumerable.Range(1, 9))
             {
-                connection.Open();
-
-                using (var command = connection.CreateCommand())
+                using (var connection = _connectionProvider.GetConnection(connectionString))
                 {
-                    foreach (var randomId in Enumerable.Range(1, 9))
+                    connection.Open();
+
+                    using (var command = connection.CreateCommand())
                     {
                         command.CommandText =
                             $"SELECT [Id], [Name], [Value] FROM [Benchmark_Simple_Table] WHERE [Name] LIKE 'string value {randomId}%'";
@@ -159,8 +161,9 @@ END ";
             return results;
         }
 
-        public IEnumerable<DataItem> UpdateMultipleRecords(string connectionString)
+        public async Task<List<DataItem>> UpdateMultipleRecords(string connectionString)
         {
+            Console.WriteLine($"Connection string: {connectionString}");
             var results = new List<DataItem>();
 
             using (var connection = _connectionProvider.GetConnection(connectionString))
@@ -199,17 +202,35 @@ WHERE
                         }
                     }
                 }
+            }
 
-                // Change the data.
-                foreach (var item in results)
-                {
-                    item.Value = 99;
-                }
+            var tasks = new List<Task>();
+            // Change the data.
+            foreach (var item in results)
+            {
+                tasks.Add(UpdateRecord(connectionString, item));
+            }
 
-                // Update the database.
+            await Task.WhenAll(tasks);
+
+            return results;
+        }
+
+        private async Task UpdateRecord(string connectionString, DataItem item)
+        {
+            item.Value = 99;
+            using (var connection = _connectionProvider.GetConnection(connectionString))
+            {
+                connection.Open();
+                // int v = new Random().Next(1, 5);
+                // Console.WriteLine($"Updating record {item.Id}. Simulating some work for {v} seconds.");
+                // Thread.Sleep(1000 * v); // Simulate some work.
+                // Console.WriteLine($"connection state {connection.State} for record {item.Id}. Updating Value to {item.Value}.");
+
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "UPDATE [Benchmark_Simple_Table] SET [Value] = @value WHERE [Id] = @id";
+                    command.CommandText = @"WAITFOR DELAY '00:00:02'
+                     UPDATE [Benchmark_Simple_Table] SET [Value] = @value WHERE [Id] = @id";
                     command.CommandTimeout = 5; // 5 seconds.
 
                     var idParameter = command.CreateParameter();
@@ -225,24 +246,19 @@ WHERE
 
                     command.Prepare();
 
-                    foreach (var item in results)
-                    {
-                        idParameter.Value = item.Id;
-                        valueParameter.Value = item.Value;
+                    idParameter.Value = item.Id;
+                    valueParameter.Value = item.Value;
 
-                        try
-                        {
-                            command.ExecuteNonQuery();
-                        }
-                        catch (Exception e)
-                        {
-                            Console.Error.WriteLine(e.Message);
-                        }
+                    try
+                    {
+                        command.ExecuteNonQuery();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Error.WriteLine(e.Message + e.ToString());
                     }
                 }
             }
-
-            return results;
         }
     }
 

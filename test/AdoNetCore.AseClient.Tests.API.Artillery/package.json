@@ -1,0 +1,16 @@
+{
+  "name": "adonetcore.aseclient.tests.api.artillery",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "artillery run adonetcore-aseclient-dummy-test.yml"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "artillery": "^2.0.24"
+  }
+}

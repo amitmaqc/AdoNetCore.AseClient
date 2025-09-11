@@ -39,7 +39,7 @@ namespace AdoNetCore.AseClient.Benchmark
         /// </summary>
 
         [Benchmark(Description = "Open a connection (unpooled) and invoke AseCommand.ExecuteReader(...) once and read back 12 rows of data.")]
-        public IEnumerable<DataItem> SingleQueryForMultipleRecordsWithUnpooledConnection()
+        public List<DataItem> SingleQueryForMultipleRecordsWithUnpooledConnection()
         {
             return _benchmark.SingleQueryForMultipleRecords(_benchmark.UnpooledConnectionString);
         }
@@ -48,7 +48,7 @@ namespace AdoNetCore.AseClient.Benchmark
         /// In this test we fetch multiple rows using a single query from simple database table with connection pooling enabled.
         /// </summary>
         [Benchmark(Description = "Open a connection (pooled) and invoke AseCommand.ExecuteReader(...) once and read back 12 rows of data.")]
-        public IEnumerable<DataItem> SingleQueryForMultipleRecordsWithPooledConnection()
+        public List<DataItem> SingleQueryForMultipleRecordsWithPooledConnection()
         {
             return _benchmark.SingleQueryForMultipleRecords(_benchmark.PooledConnectionString);
         }
@@ -57,7 +57,7 @@ namespace AdoNetCore.AseClient.Benchmark
         /// In this test we fetch multiple rows using multiple queries from simple database table without connection pooling enabled.
         /// </summary>
         [Benchmark(Description = "Open a connection (unpooled) and invoke AseCommand.ExecuteReader(...) 9 times, and read back 11-12 rows of data each time.")]
-        public IEnumerable<DataItem> MultipleQueriesForMultipleRecordsWithUnpooledConnection()
+        public List<DataItem> MultipleQueriesForMultipleRecordsWithUnpooledConnection()
         {
             return _benchmark.MultipleQueriesForMultipleRecords(_benchmark.UnpooledConnectionString);
         }
@@ -66,7 +66,7 @@ namespace AdoNetCore.AseClient.Benchmark
         /// In this test we fetch multiple rows using multiple queries from simple database table with connection pooling enabled.
         /// </summary>
         [Benchmark(Description = "Open a connection (pooled) and invoke AseCommand.ExecuteReader(...) 9 times, and read back 11-12 rows of data each time.")]
-        public IEnumerable<DataItem> MultipleQueriesForMultipleRecordsWithPooledConnection()
+        public List<DataItem> MultipleQueriesForMultipleRecordsWithPooledConnection()
         {
             return _benchmark.MultipleQueriesForMultipleRecords(_benchmark.PooledConnectionString);
         }
@@ -76,7 +76,7 @@ namespace AdoNetCore.AseClient.Benchmark
         /// Then we update the data, and update the database one record at a time. Then we return the results.
         /// </summary>
         [Benchmark(Description = "Open a connection (unpooled) and invoke AseCommand.ExecuteReader(...) once, reading back 56 rows of data. Prepare a new AseCommand and invoke AseCommand.ExecuteNonQuery(...) for each of the 56 rows to update the database.")]
-        public IEnumerable<DataItem> UpdateMultipleRecordsWithUnpooledConnection()
+        public List<DataItem> UpdateMultipleRecordsWithUnpooledConnection()
         {
             return _benchmark.UpdateMultipleRecords(_benchmark.UnpooledConnectionString);
         }
@@ -86,7 +86,7 @@ namespace AdoNetCore.AseClient.Benchmark
         /// Then we update the data, and update the database one record at a time. Then we return the results.
         /// </summary>
         [Benchmark(Description = "Open a connection (pooled) and invoke AseCommand.ExecuteReader(...) once, reading back 56 rows of data. Prepare a new AseCommand and invoke AseCommand.ExecuteNonQuery(...) for each of the 56 rows to update the database.")]
-        public IEnumerable<DataItem> UpdateMultipleRecordsWithPooledConnection()
+        public List<DataItem> UpdateMultipleRecordsWithPooledConnection()
         {
             return _benchmark.UpdateMultipleRecords(_benchmark.PooledConnectionString);
         }

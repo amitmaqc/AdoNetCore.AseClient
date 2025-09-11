@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="commit.superpharm.EntityFrameworkCore.Ase" Version="25.0.*" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.36" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.36" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+    <ProjectReference Include="..\..\src\AdoNetCore.AseClient\AdoNetCore.AseClient.csproj" />
+  </ItemGroup>
+
+</Project>

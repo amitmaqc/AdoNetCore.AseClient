@@ -1,0 +1,33 @@
+config:
+  target: "http://localhost:5052"
+  phases:
+    - duration: 2
+      arrivalRate: 50
+  processor: "./functions.js"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: Full Dummy CRUD
+    flow:
+      - function: generateName
+
+      - post:
+          url: "/api/Dummy"
+          json:
+            name: "{{ randomName }}"
+          capture:
+            - json: "$.id"
+              as: dummyId
+
+      - get:
+          url: "/api/Dummy/{{ dummyId }}"
+
+      - put:
+          url: "/api/Dummy/{{ dummyId }}"
+          json:
+            name: "Updated {{ randomName }}"
+
+      - delete:
+          url: "/api/Dummy/{{ dummyId }}"

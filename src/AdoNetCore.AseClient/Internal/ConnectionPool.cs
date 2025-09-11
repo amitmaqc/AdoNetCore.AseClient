@@ -5,6 +5,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AdoNetCore.AseClient.Interface;
+using System.Diagnostics;
 
 namespace AdoNetCore.AseClient.Internal
 {
@@ -52,6 +53,8 @@ namespace AdoNetCore.AseClient.Internal
                     var t = src.Token;
                     src.CancelAfter(TimeSpan.FromSeconds(_parameters.LoginTimeout));
 
+                    var stopwatch = Stopwatch.StartNew();
+                    Logger.Instance?.WriteLine($"Attempting to reserve connection ({_parameters.LoginTimeout}s timeout, Available {_available.Count})");
                     var task = _parameters.Pooling
                         ? ReservePooledConnection(t, eventNotifier)
                         : _connectionFactory.GetNewConnection(t, eventNotifier);
@@ -63,6 +66,8 @@ namespace AdoNetCore.AseClient.Internal
                     {
                         throw new OperationCanceledException();
                     }
+                    stopwatch.Stop();
+                    Logger.Instance?.WriteLine($"Connection reserved after {stopwatch.ElapsedMilliseconds} ms. Available {_available.Count}");
 
                     try
                     {
@@ -77,7 +82,7 @@ namespace AdoNetCore.AseClient.Internal
                     }
                     catch (Exception)
                     {
-                        if(_parameters.Pooling)
+                        if (_parameters.Pooling)
                         {
                             RemoveConnection(connection);
                         }
@@ -144,16 +149,23 @@ namespace AdoNetCore.AseClient.Internal
         private IInternalConnection FetchIdlePooledConnection(IInfoMessageEventNotifier eventNotifier)
         {
             var now = DateTime.UtcNow;
+            Logger.Instance?.WriteLine($"{nameof(FetchIdlePooledConnection)} start. Available connections {_available.Count}, Pool size {PoolSize}");
+            var watch = Stopwatch.StartNew();
+            watch.Start();
             while (_available.TryTake(out var connection))
             {
+                watch.Stop();
+                Logger.Instance?.WriteLine($"[{DateTime.Now}] FetchIdlePooledConnection: Got connection after {watch.ElapsedMilliseconds} ms. Available connections {_available.Count}");
                 if (ShouldRemoveAndReplace(connection, now))
                 {
+                    Logger.Instance?.WriteLine($"[{DateTime.Now}] FetchIdlePooledConnection: Should remove and replace connection. Available connections {_available.Count}");
                     RemoveAndReplace(connection);
                     continue;
                 }
 
                 if (_parameters.PingServer && !connection.Ping())
                 {
+                    Logger.Instance?.WriteLine($"[{DateTime.Now}] FetchIdlePooledConnection: Ping failed - remove and replace. Available connections {_available.Count}");
                     RemoveAndReplace(connection);
                     continue;
                 }
