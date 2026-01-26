@@ -221,7 +221,7 @@ namespace AdoNetCore.AseClient.Internal
                     AddToPool(await CreateNewPooledConnection(/*Since this is an internal optimisation, there's no point supplying a cancellation token or event notifier*/));
                     Logger.Instance?.WriteLine($"{nameof(TryFillPoolToMinSize)} added new internal connection");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Logger.Instance?.WriteLine($"{nameof(TryFillPoolToMinSize)} exception: {ex}");
                 }
@@ -262,6 +262,7 @@ namespace AdoNetCore.AseClient.Internal
 
         private void RemoveConnection(IInternalConnection connection = null)
         {
+            Logger.Instance?.WriteLine($"{nameof(RemoveConnection)}");
             lock (_mutex)
             {
                 try
@@ -286,19 +287,23 @@ namespace AdoNetCore.AseClient.Internal
 
         private bool ShouldRemoveAndReplace(IInternalConnection connection, DateTime now)
         {
+            Logger.Instance?.WriteLine($"{nameof(ShouldRemoveAndReplace)}: " +
+            $" ConnectionLifetime > TotalSeconds ? {_parameters.ConnectionLifetime} > {(now - connection.Created).TotalSeconds} seconds ? {_parameters.ConnectionLifetime < (now - connection.Created).TotalSeconds} & " +
+            $" ConnectionIdleTimeout > LastActive).TotalSeconds ? {_parameters.ConnectionIdleTimeout} > {(now - connection.LastActive).TotalSeconds} seconds ? {_parameters.ConnectionIdleTimeout < (now - connection.LastActive).TotalSeconds}");
             return connection.IsDoomed
-                   || (_parameters.ConnectionLifetime > 0 && _parameters.ConnectionLifetime < (now - connection.Created).TotalSeconds)
-                   || (_parameters.ConnectionIdleTimeout > 0 && _parameters.ConnectionIdleTimeout < (now - connection.LastActive).TotalSeconds);
+                       || (_parameters.ConnectionLifetime > 0 && _parameters.ConnectionLifetime < (now - connection.Created).TotalSeconds)
+                       || (_parameters.ConnectionIdleTimeout > 0 && _parameters.ConnectionIdleTimeout < (now - connection.LastActive).TotalSeconds);
         }
 
         public void Release(IInternalConnection connection)
         {
+            Logger.Instance?.WriteLine($"{nameof(Release)}");
             if (!_parameters.Pooling)
             {
                 connection?.Dispose();
                 return;
             }
-            
+
             if (connection == null)
             {
                 return;
@@ -311,7 +316,7 @@ namespace AdoNetCore.AseClient.Internal
                 Logger.Instance?.WriteLine("Released connection was removed. Creation of a replacement was tasked.");
                 return;
             }
-            
+
             AddToPool(connection);
         }
 

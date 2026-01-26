@@ -52,7 +52,7 @@ namespace AdoNetCore.AseClient.Internal
             try
             {
                 connection.Login();
-                return Task.FromResult((IInternalConnection) connection);
+                return Task.FromResult((IInternalConnection)connection);
             }
             catch (AseException)
             {
@@ -60,7 +60,7 @@ namespace AdoNetCore.AseClient.Internal
                 socket?.Dispose();
                 throw;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Logger.Instance?.WriteLine($"{nameof(InternalConnectionFactory)}.{nameof(GetNewConnection)} encountered exception: {ex}");
                 connection.Dispose();
@@ -85,9 +85,9 @@ namespace AdoNetCore.AseClient.Internal
                 Logger.Instance?.WriteLine($"{nameof(InternalConnectionFactory)}.{nameof(GetNewConnection)} canceled operation");
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new AseException("Client unable to establish a connection", 30010);
+                throw new AseException("Client unable to establish a connection: " + ex.ToString(), 30010);
             }
         }
 

@@ -83,19 +83,19 @@ namespace AdoNetCore.AseClient.Internal
         public void WriteLine(string line, LogLevel level = LogLevel.Information)
         {
             Log(level, line);
-            var formatted = $"{Timestamp}{line}";
-            if (ToConsole) Console.WriteLine(formatted);
-            if (ToDebug) Debug.WriteLine(formatted);
-            _lineStart = true;
+            // var formatted = $"{Timestamp}{line}";
+            // if (ToConsole) Console.WriteLine(formatted);
+            // if (ToDebug) Debug.WriteLine(formatted);
+            // _lineStart = true;
         }
 
         public void Write(string value, LogLevel level = LogLevel.Information)
         {
             Log(level, value);
-            var formatted = $"{Timestamp}{value}";
-            if (ToConsole) Console.Write(formatted);
-            if (ToDebug) Debug.Write(formatted);
-            _lineStart = false;
+            // var formatted = $"{Timestamp}{value}";
+            // if (ToConsole) Console.Write(formatted);
+            // if (ToDebug) Debug.Write(formatted);
+            // _lineStart = false;
         }
 
         public void Log(LogLevel level, string message)
